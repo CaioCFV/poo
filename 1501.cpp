@@ -27,7 +27,7 @@ cmd execCMD(){
         case 7:
             return SAIR;
         default:
-            cout << "COMANDO NÃO ENCONTRADO" << endl;
+            cout << "COMANDO NÃO ENCONTRADO: " << strCmd << endl;
 			return SAIR;
     }
 };
@@ -49,13 +49,17 @@ void mostrarOpcoesCMD(){
 class Pessoa {
     protected:
         int codigo;
-        string nome, tipo_pessoa = "NÃO DEFINIDO";
+        string nome, tipo_pessoa;
         double rendaanual, IR;
 
     public:
+        Pessoa() {
+            tipo_pessoa = "NÃO DEFINIDO";
+        }
         virtual void adicionar() = 0;
         virtual void calcularIR() = 0;
         virtual void mostrar() = 0;
+        virtual string getDocumento() = 0;
         int getCodigo();
         double getIR();
         string getNome();
@@ -85,19 +89,24 @@ double Pessoa::getRendaAnual(){
     return rendaanual;
 };
 
+
 /****************************************************
     PESSOA FISICA
 ****************************************************/
 
 class PessoaFisica : public Pessoa {
     private:
-        string tipo_pessoa = "F", cpf, profissao;
+        string cpf, profissao;
         int dependentes;
 
     public:
+        PessoaFisica(){
+            tipo_pessoa = "F";
+        }
         void adicionar();
         void calcularIR();
         void mostrar();
+        string getDocumento();
 };
 
 void PessoaFisica::adicionar(){
@@ -117,7 +126,7 @@ void PessoaFisica::mostrar(){
     cout << "Codigo : " << getCodigo() << endl;
     cout << "Nome : " << getNome() << endl;
     cout << "Renda Anual : " << getRendaAnual() << endl;
-    cout << "CPF : " << cpf << endl;
+    cout << "CPF : " << getDocumento() << endl;
     cout << "Profissao : " << profissao << endl;
     cout << "Dependentes : " << dependentes << endl;
 };
@@ -126,18 +135,26 @@ void PessoaFisica::calcularIR(){
     IR = 0.07 * rendaanual;
 };
 
+string PessoaFisica::getDocumento(){
+    return cpf;
+};
+
 /****************************************************
     PESSOA JURIDICA
 ****************************************************/
 
 class PessoaJuridica : public Pessoa {
     private:
-        string tipo_pessoa = "J", insc_municipal, insc_estadual, cnpj;
+        string insc_municipal, insc_estadual, cnpj;
         int dependentes;
     public:
+        PessoaJuridica(){
+            tipo_pessoa = "J";
+        }
         void adicionar();
         void calcularIR();
         void mostrar();
+        string getDocumento();
 };
 
 void PessoaJuridica::adicionar(){
@@ -166,9 +183,13 @@ void PessoaJuridica::mostrar(){
     cout << "Codigo : " << getCodigo() << endl;
     cout << "Nome : " << getNome() << endl;
     cout << "Renda Anual : " << getRendaAnual() << endl;
-    cout << "CPF : " << cnpj << endl;
+    cout << "CPF : " << getDocumento() << endl;
     cout << "Inscr. Mun. : " << insc_municipal << endl;
     cout << "Inscr. Est. : " << insc_estadual << endl;
+};
+
+string PessoaJuridica::getDocumento(){
+    return cnpj;
 };
 
 /****************************************************
@@ -187,6 +208,7 @@ class Contadora {
         void consultarIR(int &cod);
         void mostrar(int &cod);
         void listar();
+        void remover(int &cod);
 };
 
 void Contadora::adicionarPF(){
@@ -220,10 +242,15 @@ void Contadora::mostrar(int &cod){
 }
 
 void Contadora::listar(){
+    string code, codeFormated;
+    int precision;
+
     cout 
         << setw(7)  << left   << "Codigo"
         << setw(31) << left   << "Nome"
-        << setw(3)            <<  "F/J"
+        <<  "F"
+        <<  "/"
+        <<  "J"
         << setw(21) << right << "CPF/CNPJ"
         << setw(3)  << left << ""
         << setw(10) << right << "IR"
@@ -231,14 +258,33 @@ void Contadora::listar(){
 
 
     for(int i=0;i<qtd_pessoas;i++){
+        code = to_string(pessoas[i]->getCodigo());
+        size_t n = 5;
+        precision = n - min(n, code.size());
+        codeFormated = string(precision, '0').append(code);
+ 
         cout 
-            << setw(7)  << left   << 
-            << setw(31) << left   << "Nome"
-            << setw(3)            <<  "F/J"
-            << setw(21) << right << "CPF/CNPJ"
-            << setw(3)  << left << ""
-            << setw(10) << right << "IR"
+            << setw(7)  << left     << codeFormated
+            << setw(31) << left     << pessoas[i]->getNome()
+                                    << " "
+                                    << pessoas[i]->getTipoPessoa()
+                                    << " "
+            << setw(21) << right    << pessoas[i]->getDocumento()
+            << setw(3)  << right    << "R$"
+            << setw(10) << right    << fixed << setprecision(2) << pessoas[i]->getIR()
             << endl;
+    }
+}
+
+void Contadora::remover(int &cod){
+    int referencia = 0;
+    for(int i=0;i<qtd_pessoas;i++){
+        if(pessoas[i]->getCodigo() == cod){
+            qtd_pessoas -= 1;
+            referencia += 1;
+        }
+        pessoas[i] = pessoas[referencia];
+        referencia += 1;
     }
 }
 
@@ -270,12 +316,17 @@ int main() {
 
 
             case REMOVER:
-                finalizar = true;
+                cin >> codigo_de_pesquisa;
+                cin.ignore();
+                contadora.remover(codigo_de_pesquisa);
+                cout << "Entre com a sua escolha:" << endl;
+                mostrarOpcoesCMD();
                 break;
 
 
             case MOSTRAR:
                 cin >> codigo_de_pesquisa;
+                cin.ignore();
                 cout << "Entre com a sua escolha:" << endl;
                 contadora.mostrar(codigo_de_pesquisa);
                 mostrarOpcoesCMD();
@@ -284,6 +335,7 @@ int main() {
 
             case CONSULTAR_IR:
                 cin >> codigo_de_pesquisa;
+                cin.ignore();
                 cout << "Entre com a sua escolha:" << endl;
                 contadora.consultarIR(codigo_de_pesquisa);
                 mostrarOpcoesCMD();
@@ -303,27 +355,9 @@ int main() {
                 cout << "Programa encerrado!" << endl;
                 break;
 
-
             default:
-                finalizar = true;
-                cout << "COMANDO NÃO ENCONTRADO" << endl;
     			break;
         }
     }
     return 0; 
 };
-
-// cout << codigo << endl;
-// cout << nome << endl;
-// cout << rendaanual << endl;
-// cout << cpf << endl;
-// cout << profissao << endl;
-// cout << dependentes << endl;
-
-
-    // cout << codigo << endl;
-    // cout << nome << endl;
-    // cout << rendaanual << endl;
-    // cout << cnpj << endl;
-    // cout << insc_municipal << endl;
-    // cout << insc_estadual << endl;
