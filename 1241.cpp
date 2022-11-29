@@ -57,21 +57,10 @@ void Contato::addPessoa(string nome, int idade, double altura){
     cout << "Contato " << nome << " inserido com sucesso!" << endl;
 }
    
-int main(){
-    string comand;
-    cout << "!Nome !Idade !Altura !" << endl;
-    while(comand != "SAIR"){
-        Agenda a;
-        getline(cin, comand);
-        if(comand == "INS"){
-            a.addPessoa();
-        }else if(comand == "LST"){
-            //a.lst();
-        }else if(comand == "VER"){
-            a.verPessoa();
-        }else if(comand == "REM"){
-            //cout << "REMOVER PUTO" << endl;
-        }
-    }
+int main() {
+    TPoligono p;
+	p.ler();
+    cout << fixed << setprecision(2);
+    cout << "perimetro - " << p.perimetro() << endl;
     return 0;
 }

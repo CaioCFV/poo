@@ -1,0 +1,134 @@
+#include<iostream>
+#include<iomanip>
+
+using namespace std;
+
+class Jogador
+{
+   private:
+      string nome;
+      int    idade;
+      double altura,peso;
+      string nacionalidade;
+   protected:
+      int getIdade() { return idade; }
+   public:
+      void ler();
+      void mostrar();
+      virtual int tempoRestante();
+      virtual string getPosicao();
+};
+
+void Jogador::ler()
+{ 	 	
+   getline(cin, nome);
+   cin >> idade;
+   cin.ignore();
+   getline(cin, nacionalidade);
+   cin >> altura >> peso;
+   cin.ignore();
+}
+
+void Jogador::mostrar()
+{
+   cout << "nome          : " << nome << endl;
+   cout << "posicao       : " << getPosicao() << endl;
+   cout << "idade         : " << idade << " anos" << endl;
+   cout << "nacionalidade : " << nacionalidade << endl;
+   cout << "altura        : " << setprecision(2) << fixed << altura << " m" << endl;
+   cout << "peso          : " << setprecision(1) << peso << " kg" << endl;
+   cout << "tempo util    : " << tempoRestante() << " anos" << endl;
+}
+
+int Jogador::tempoRestante()
+{
+  return 0;
+}
+
+string Jogador::getPosicao()
+{
+  return "desconhecido";
+}
+
+class Defesa : public Jogador
+{
+    public:   
+      string getPosicao() {	return "Defesa";	}
+      int tempoRestante() {	return 40-getIdade();	}
+};
+
+class MeioCampo : public Jogador
+{
+    public:   
+      string getPosicao() {	return "Meio Campo";	}
+      int tempoRestante() {	return 38-getIdade();	}
+};
+
+
+class Atacante : public Jogador
+{
+    public:   
+      string getPosicao() {	return "Atacante";	}
+      int tempoRestante() {	return 35-getIdade();	}
+};
+
+class Jogadores
+{
+   private:
+     Jogador* vet[100];
+     int      qtd;
+   public:
+      Jogadores();
+      ~Jogadores();
+      void ler();
+      void listar();
+};
+
+Jogadores::Jogadores()
+{
+   qtd = 0;
+}
+
+Jogadores::~Jogadores()
+{
+   for(int i=0;i<qtd; i++)
+      delete vet[i];
+}
+
+void Jogadores::ler()
+{
+    string posicao;
+    cin >> qtd;
+    cin.ignore();
+    for(int i=0; i< qtd; i++)
+    {
+	getline(cin, posicao);
+        if (posicao=="defesa")
+	   vet[i] = new Defesa();
+	else if (posicao=="ataque")
+           vet[i] = new Atacante();
+        else if (posicao=="meio campo")
+           vet[i] = new MeioCampo();
+        else
+        {
+           cout << "Tipo " << posicao << " nao existente!" << endl;
+           exit(1);
+        }
+        vet[i]->ler();
+     }
+}
+
+void Jogadores::listar()
+{
+   for(int i=0;i<qtd; i++)
+      vet[i]->mostrar();
+}
+
+
+int main()
+{
+   Jogadores j;
+   j.ler();
+   j.listar();   
+   return 0;
+}
