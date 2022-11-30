@@ -203,6 +203,11 @@ class Contadora {
 
     public:
         Contadora() { qtd_pessoas = 0; }
+        ~Contadora() {
+            for(int i=0;i<qtd_pessoas;i++){
+                delete pessoas[i];
+            }
+        }
         void adicionarPF();
         void adicionarPJ();
         void consultarIR(int &cod);
