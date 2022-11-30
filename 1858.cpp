@@ -43,7 +43,6 @@ void esperarOK(){
     }
 }
 
-
 void mostrarOpcoesCMD(){
     cout << "1. inserir cliente" << endl;
     cout << "2. remover cliente pelo cpf" << endl;
